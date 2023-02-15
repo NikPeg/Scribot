@@ -1,4 +1,5 @@
 from settings import *
+from messages import *
 import telebot
 from telebot import types
 
@@ -14,9 +15,17 @@ def start(message):
     btn4 = types.InlineKeyboardButton(text='Отправить донат', callback_data='donate')
     markup.add(btn1, btn2)
     markup.add(btn3, btn4)
-    bot.send_message(message.from_user.id, "👋Привет!\nЭто бот проекта Scribo. В нём ты можешь получить оформление"
-                                           " своей работы всего за 299 рублей! Выбери желаемое действие:",
-                     reply_markup=markup)
+    bot.send_message(message.from_user.id, START_MESSAGE, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call:True)
+def callback_query(call):
+    req = call.data.split('_')
+    if req[0] == 'info':
+        markup = types.InlineKeyboardMarkup()
+        btn1 = types.InlineKeyboardButton(text='Канал проекта', url='https://t.me/scribo_project')
+        markup.add(btn1)
+        bot.send_message(call.from_user.id, ABOUT_MESSAGE, reply_markup=markup)
 
 
 bot.polling(none_stop=True, interval=0)
