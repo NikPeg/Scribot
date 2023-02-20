@@ -34,8 +34,6 @@ def callback_query(call):
             message_id=call.message.message_id,
         )
     elif req[0] == 'download':
-        btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
-        markup.add(btn1)
         bot.edit_message_text(
             DOWNLOAD_MESSAGE,
             reply_markup=markup,
@@ -72,10 +70,7 @@ def callback_query(call):
 
 @bot.message_handler(content_types=['document'])
 def get_message(message):
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
-    markup.add(btn1)
-    bot.send_message(message.from_user.id, PAY_MESSAGE, reply_markup=markup)
+    bot.send_message(message.from_user.id, PAY_MESSAGE, parse_mode='Markdown')
 
 
 bot.infinity_polling()
