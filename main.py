@@ -6,7 +6,7 @@ from telebot import types
 bot = telebot.TeleBot(TOKEN)
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start', 'help'])
 def start(message):
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
@@ -70,9 +70,12 @@ def callback_query(call):
         )
 
 
-# @bot.
-# def get_message(message):
-#     bot.send_message(message.from_user.id, "Hello!")
+@bot.message_handler(content_types=['document'])
+def get_message(message):
+    markup = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+    markup.add(btn1)
+    bot.send_message(message.from_user.id, PAY_MESSAGE, reply_markup=markup)
 
 
 bot.infinity_polling()
