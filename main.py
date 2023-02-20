@@ -70,4 +70,9 @@ def callback_query(call):
         )
 
 
-bot.polling(none_stop=True, interval=0)
+# @bot.
+# def get_message(message):
+#     bot.send_message(message.from_user.id, "Hello!")
+
+
+bot.infinity_polling()
