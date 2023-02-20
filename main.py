@@ -4,10 +4,14 @@ import telebot
 from telebot import types
 
 bot = telebot.TeleBot(TOKEN)
+all_users = set()
 
 
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
+    if message.from_user.id not in all_users:
+        all_users.add(message.from_user.id)
+        bot.send_message(ADMIN, f"User @{message.from_user.username} started a bot.")
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
     btn2 = types.InlineKeyboardButton(text='Узнать о Scribo', callback_data='info')
@@ -18,7 +22,7 @@ def start(message):
     bot.send_message(message.from_user.id, START_MESSAGE, reply_markup=markup)
 
 
-@bot.callback_query_handler(func=lambda call:True)
+@bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     req = call.data.split('_')
     markup = types.InlineKeyboardMarkup()
@@ -79,6 +83,7 @@ def get_message(message):
     btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
     markup.add(btn1)
     bot.send_message(message.from_user.id, PAID_MESSAGE, reply_markup=markup)
+    bot.send_message(ADMIN, f"User @{message.from_user.username} paid!")
 
 
 bot.infinity_polling()
