@@ -70,7 +70,15 @@ def callback_query(call):
 
 @bot.message_handler(content_types=['document'])
 def get_message(message):
-    bot.send_message(message.from_user.id, PAY_MESSAGE, parse_mode='Markdown')
+    bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
+
+
+@bot.message_handler(content_types=['photo'])
+def get_message(message):
+    markup = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+    markup.add(btn1)
+    bot.send_message(message.from_user.id, PAID_MESSAGE, reply_markup=markup)
 
 
 bot.infinity_polling()
