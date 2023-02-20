@@ -33,6 +33,15 @@ def callback_query(call):
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
         )
+    elif req[0] == 'download':
+        btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+        markup.add(btn1)
+        bot.edit_message_text(
+            DOWNLOAD_MESSAGE,
+            reply_markup=markup,
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+        )
     elif req[0] == 'menu':
         btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
         btn2 = types.InlineKeyboardButton(text='Узнать о Scribo', callback_data='info')
