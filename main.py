@@ -81,12 +81,24 @@ def callback_query(call):
     elif req[0] == 'work':
         btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
         markup.add(btn1)
-        bot.edit_message_text(
-            WORK_MESSAGE,
-            reply_markup=markup,
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-        )
+        if call.message.chat.id not in making:
+            bot.edit_message_text(
+                WORK_MESSAGE,
+                reply_markup=markup,
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+            )
+            chat_id = int(req[1])
+            message_id = int(req[2])
+            making[call.message.chat.id] = (chat_id, message_id)
+            current_works.remove((chat_id, message_id))
+        else:
+            bot.edit_message_text(
+                WRONG_WORK_MESSAGE,
+                reply_markup=markup,
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+            )
     elif req[0] == 'list':
         btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
         markup.add(btn1)
@@ -113,7 +125,7 @@ def get_message(message):
     bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
     current_works.append((message.from_user.id, message.id))
     markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text='Взять в работу', callback_data='work')
+    btn1 = types.InlineKeyboardButton(text='Взять в работу', callback_data=f'work_{message.from_user.id}_{message.id}')
     btn2 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
     markup.add(btn1)
     markup.add(btn2)
