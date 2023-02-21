@@ -4,7 +4,9 @@ import telebot
 from telebot import types
 
 bot = telebot.TeleBot(TOKEN)
-all_users = set()
+all_users = set()  # user ids in integer type
+current_works = []  # users' works in (chat_id: int, message_id: int) type
+making = {}  # link between moderator and work. moderator_id: (chat_id: int, message_id: int)
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -85,6 +87,23 @@ def callback_query(call):
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
         )
+    elif req[0] == 'list':
+        btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+        markup.add(btn1)
+        if len(current_works):
+            bot.edit_message_text(
+                LIST_MESSAGE,
+                reply_markup=markup,
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+            )
+        else:
+            bot.edit_message_text(
+                EMPTY_LIST_MESSAGE,
+                reply_markup=markup,
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+            )
 
 
 @bot.message_handler(content_types=['document'])
