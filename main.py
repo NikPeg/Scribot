@@ -70,15 +70,29 @@ def callback_query(call):
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
         )
+    elif req[0] == 'work':
+        btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+        markup.add(btn1)
+        bot.edit_message_text(
+            WORK_MESSAGE,
+            reply_markup=markup,
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+        )
 
 
 @bot.message_handler(content_types=['document'])
 def get_message(message):
     bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
+    markup = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton(text='Взять в работу', callback_data='work')
+    btn2 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+    markup.add(btn1)
+    markup.add(btn2)
     for moderator_id in MODERATORS:
         try:
-            bot.send_message(moderator_id, NEW_WORK_MESSAGE)
             bot.forward_message(moderator_id, message.from_user.id, message.id)
+            bot.send_message(moderator_id, NEW_WORK_MESSAGE, reply_markup=markup)
         except telebot.apihelper.ApiTelegramException:
             print(f"Moderator {moderator_id} has not started the bot yet")
 
