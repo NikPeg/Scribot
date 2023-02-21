@@ -146,4 +146,15 @@ def get_message(message):
     bot.send_message(ADMIN, f"User @{message.from_user.username} paid!")
 
 
+@bot.message_handler(content_types=['text'])
+def get_message(message):
+    markup = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+    markup.add(btn1)
+    if message.from_user.id in MODERATORS and message.text == "беру":
+        bot.send_message(message.from_user.id, "Кайф", reply_markup=markup)
+    else:
+        bot.send_message(message.from_user.id, IDK_MESSAGE, reply_markup=markup)
+
+
 bot.infinity_polling()
