@@ -5,8 +5,8 @@ from telebot import types
 
 bot = telebot.TeleBot(TOKEN)
 all_users = set()  # user ids in integer type
-current_works = []  # users' works in (chat_id: int, message_id: int) type
-making = {}  # link between moderator and work. moderator_id: (chat_id: int, message_id: int)
+current_works = []  # users' works in (chat_id: int, message_id: int, file_id: str) type
+decorating = {}  # link between moderator and work. moderator_id: chat_id: int
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -81,7 +81,7 @@ def callback_query(call):
     elif req[0] == 'work':
         btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
         markup.add(btn1)
-        if call.message.chat.id not in making:
+        if call.message.chat.id not in decorating:
             bot.edit_message_text(
                 WORK_MESSAGE,
                 reply_markup=markup,
@@ -90,8 +90,9 @@ def callback_query(call):
             )
             chat_id = int(req[1])
             message_id = int(req[2])
-            making[call.message.chat.id] = (chat_id, message_id)
-            current_works.remove((chat_id, message_id))
+            file_unique_id = req[3]
+            decorating[call.message.chat.id] = chat_id
+            current_works.remove((chat_id, message_id, file_unique_id))
         else:
             bot.edit_message_text(
                 WRONG_WORK_MESSAGE,
@@ -109,7 +110,7 @@ def callback_query(call):
                 chat_id=call.message.chat.id,
                 message_id=call.message.message_id,
             )
-            for work_chat_id, work_message_id in current_works:
+            for work_chat_id, work_message_id, file_unique_id in current_works:
                 bot.forward_message(call.message.chat.id, work_chat_id, work_message_id)
         else:
             bot.edit_message_text(
@@ -121,11 +122,14 @@ def callback_query(call):
 
 
 @bot.message_handler(content_types=['document'])
-def get_message(message):
+def get_document(message):
     bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
-    current_works.append((message.from_user.id, message.id))
+    current_works.append((message.from_user.id, message.id, message.document.file_unique_id))
     markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text='Взять в работу', callback_data=f'work_{message.from_user.id}_{message.id}')
+    btn1 = types.InlineKeyboardButton(
+        text='Взять в работу',
+        callback_data=f'work_{message.from_user.id}_{message.id}_{message.document.file_unique_id}',
+    )
     btn2 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
     markup.add(btn1)
     markup.add(btn2)
@@ -138,7 +142,7 @@ def get_message(message):
 
 
 @bot.message_handler(content_types=['photo'])
-def get_message(message):
+def get_photo(message):
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
     markup.add(btn1)
@@ -146,13 +150,28 @@ def get_message(message):
     bot.send_message(ADMIN, f"User @{message.from_user.username} paid!")
 
 
+def remove_work(file_unique_id):
+    for work in current_works:
+        if work[2] == file_unique_id:
+            current_works.remove(work)
+            break
+
+
 @bot.message_handler(content_types=['text'])
 def get_message(message):
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
     markup.add(btn1)
-    if message.from_user.id in MODERATORS and message.text == "беру":
-        bot.send_message(message.from_user.id, "Кайф", reply_markup=markup)
+    if message.from_user.id in MODERATORS and message.text.lower() == "беру":
+        if message.from_user.id in decorating:
+            bot.send_message(message.from_user.id, WRONG_WORK_MESSAGE, reply_markup=markup)
+        elif message.reply_to_message:
+            bot.send_message(message.from_user.id, WORK_MESSAGE, reply_markup=markup)
+            reply_chat_id = message.reply_to_message.forward_from.id
+            decorating[message.from_user.id] = reply_chat_id
+            remove_work(message.reply_to_message.document.file_unique_id)
+        else:
+            bot.send_message(message.from_user.id, WRONG_REPLY_MESSAGE, reply_markup=markup)
     else:
         bot.send_message(message.from_user.id, IDK_MESSAGE, reply_markup=markup)
 
