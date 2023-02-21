@@ -75,6 +75,12 @@ def callback_query(call):
 @bot.message_handler(content_types=['document'])
 def get_message(message):
     bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
+    for moderator_id in MODERATORS:
+        try:
+            bot.send_message(moderator_id, NEW_WORK_MESSAGE)
+            bot.forward_message(moderator_id, message.from_user.id, message.id)
+        except telebot.apihelper.ApiTelegramException:
+            print(f"Moderator {moderator_id} has not started the bot yet")
 
 
 @bot.message_handler(content_types=['photo'])
