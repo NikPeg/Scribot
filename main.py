@@ -123,22 +123,34 @@ def callback_query(call):
 
 @bot.message_handler(content_types=['document'])
 def get_document(message):
-    bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
-    current_works.append((message.from_user.id, message.id, message.document.file_unique_id))
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(
-        text='Взять в работу',
-        callback_data=f'work_{message.from_user.id}_{message.id}_{message.document.file_unique_id}',
-    )
-    btn2 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
-    markup.add(btn1)
-    markup.add(btn2)
-    for moderator_id in MODERATORS:
-        try:
-            bot.forward_message(moderator_id, message.from_user.id, message.id)
-            bot.send_message(moderator_id, NEW_WORK_MESSAGE, reply_markup=markup)
-        except telebot.apihelper.ApiTelegramException:
-            print(f"Moderator {moderator_id} has not started the bot yet")
+    if message.from_user.id not in MODERATORS:
+        bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
+        current_works.append((message.from_user.id, message.id, message.document.file_unique_id))
+        markup = types.InlineKeyboardMarkup()
+        btn1 = types.InlineKeyboardButton(
+            text='Взять в работу',
+            callback_data=f'work_{message.from_user.id}_{message.id}_{message.document.file_unique_id}',
+        )
+        btn2 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+        markup.add(btn1)
+        markup.add(btn2)
+        for moderator_id in MODERATORS:
+            try:
+                bot.forward_message(moderator_id, message.from_user.id, message.id)
+                bot.send_message(moderator_id, NEW_WORK_MESSAGE, reply_markup=markup)
+            except telebot.apihelper.ApiTelegramException:
+                print(f"Moderator {moderator_id} has not started the bot yet")
+    elif message.from_user.id in decorating:
+        moderator_id = message.from_user.id
+        markup = types.InlineKeyboardMarkup()
+        btn1 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
+        markup.add(btn1)
+        bot.send_message(moderator_id, GOOD_WORK_MESSAGE, reply_markup=markup)
+        bot.forward_message(decorating[moderator_id], moderator_id, message.id)
+        bot.send_message(decorating[moderator_id], READY_MESSAGE, reply_markup=markup)
+        del decorating[moderator_id]
+    else:
+        bot.send_message(message.from_user.id, NO_WORKS_MESSAGE, parse_mode='Markdown')
 
 
 @bot.message_handler(content_types=['photo'])
