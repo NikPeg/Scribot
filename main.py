@@ -97,6 +97,8 @@ def callback_query(call):
                 chat_id=call.message.chat.id,
                 message_id=call.message.message_id,
             )
+            for work_chat_id, work_message_id in current_works:
+                bot.forward_message(call.message.chat.id, work_chat_id, work_message_id)
         else:
             bot.edit_message_text(
                 EMPTY_LIST_MESSAGE,
@@ -109,6 +111,7 @@ def callback_query(call):
 @bot.message_handler(content_types=['document'])
 def get_message(message):
     bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
+    current_works.append((message.from_user.id, message.id))
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Взять в работу', callback_data='work')
     btn2 = types.InlineKeyboardButton(text='Главное меню', callback_data='menu')
