@@ -18,7 +18,7 @@ def start(message):
     btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
     btn2 = types.InlineKeyboardButton(text='Узнать о Scribo', callback_data='info')
     btn3 = types.InlineKeyboardButton(text='Связаться с командой', callback_data='connect')
-    btn4 = types.InlineKeyboardButton(text='Отправить донат', callback_data='donate')
+    btn4 = types.InlineKeyboardButton(text='Отправить донат', url=DONATE_URL)
     markup.add(btn1, btn2)
     markup.add(btn3, btn4)
     if message.from_user.id in MODERATORS:
@@ -53,8 +53,7 @@ def callback_query(call):
         btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
         btn2 = types.InlineKeyboardButton(text='Узнать о Scribo', callback_data='info')
         btn3 = types.InlineKeyboardButton(text='Связаться с командой', callback_data='connect')
-        btn4 = types.InlineKeyboardButton(text='Отправить донат', url='https://vtb.paymo.ru/collect-money/?transaction'
-                                                                      '=73419948-d0f9-4381-bfa6-93d4bbe35954')
+        btn4 = types.InlineKeyboardButton(text='Отправить донат', url=DONATE_URL)
         markup.add(btn1, btn2)
         markup.add(btn3, btn4)
         if call.message.chat.id in MODERATORS:
