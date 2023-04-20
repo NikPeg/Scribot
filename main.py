@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 
 bot = telebot.TeleBot(TOKEN)
-all_users = set()  # user ids in integer type
+all_users = {}  # user's id: count of works
 current_works = []  # users' works in (chat_id: int, message_id: int, file_id: str) type
 decorating = {}  # link between moderator and work. moderator_id: chat_id: int
 
@@ -12,7 +12,7 @@ decorating = {}  # link between moderator and work. moderator_id: chat_id: int
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
     if message.from_user.id not in all_users:
-        all_users.add(message.from_user.id)
+        all_users[message.from_user.id] = 0
         bot.send_message(ADMIN, f"User @{message.from_user.username} started a bot.")
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
