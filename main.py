@@ -4,15 +4,15 @@ import telebot
 from telebot import types
 
 bot = telebot.TeleBot(TOKEN)
-all_users = {}  # user's id: count of works
+users_works_count = {}  # user's id: count of works
 current_works = []  # users' works in (chat_id: int, message_id: int, file_id: str) type
 decorating = {}  # link between moderator and work. moderator_id: chat_id: int
 
 
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
-    if message.from_user.id not in all_users:
-        all_users[message.from_user.id] = 0
+    if message.from_user.id not in users_works_count:
+        users_works_count[message.from_user.id] = 0
         bot.send_message(ADMIN, f"User @{message.from_user.username} started a bot.")
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Загрузить работу', callback_data='download')
@@ -24,7 +24,7 @@ def start(message):
     if message.from_user.id in MODERATORS:
         btn5 = types.InlineKeyboardButton(text='Список доступных работ', callback_data='list')
         markup.add(btn5)
-    bot.send_message(message.from_user.id, START_MESSAGE, reply_markup=markup)
+    bot.send_message(message.from_user.id, START_MESSAGE, reply_markup=markup, parse_mode='html')
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -64,6 +64,7 @@ def callback_query(call):
             reply_markup=markup,
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
+            parse_mode = 'html',
         )
     elif req[0] == 'connect':
         btn1 = types.InlineKeyboardButton(text='Представитель Scribo', url='https://t.me/nikpeg')
