@@ -124,7 +124,20 @@ def callback_query(call):
 @bot.message_handler(content_types=['document'])
 def get_document(message):
     if message.from_user.id not in MODERATORS:
-        bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
+        users_works_count[message.from_user.id] = users_works_count.get(message.from_user.id, 0) + 1
+        remaining_works = 3 - users_works_count.get(message.from_user.id, 0)
+        if remaining_works >= 0:
+            bot.send_message(
+                message.from_user.id,
+                WORK_DOWNLOADED_FREE_MESSAGE.format(
+                    remaining_works,
+                    "ое" if remaining_works == 1 else "ых",
+                    "е" if remaining_works <= 1 else "я",
+                ),
+                parse_mode='Markdown',
+            )
+        else:
+            bot.send_message(message.from_user.id, WORK_DOWNLOADED_MESSAGE, parse_mode='Markdown')
         current_works.append((message.from_user.id, message.id, message.document.file_unique_id))
         markup = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton(
